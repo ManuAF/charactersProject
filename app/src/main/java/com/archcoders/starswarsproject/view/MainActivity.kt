@@ -15,45 +15,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), OnClickCharacter{
+class MainActivity : AppCompatActivity(){
 
     private lateinit var binding: ActivityMainBinding
-    private var characters = mutableListOf<CharacterEntity>()
-    private var viewModel: ListCharacterViewModel = ListCharacterViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        getCharacterList()
-        setObservers()
+        bindViews()
     }
 
-    private fun getCharacterList() {
-        lifecycleScope.launch {
-            viewModel.createUserList()
-        }
+    private fun bindViews() {
+        supportFragmentManager.beginTransaction().add(
+            binding.flCharacters.id,
+            ListCharactersFragment()
+        ).commitAllowingStateLoss()
     }
 
-    private fun setObservers() {
-        viewModel._characters.observe(this){
-            characters = it
-            createCharactersView()
-        }
+    fun goToCharacter(character: CharacterEntity){
+        binding.flCharacters.removeAllViews()
+        supportFragmentManager.beginTransaction().add(
+            binding.flCharacters.id,
+            DetailFragment(character)
+        ).commitAllowingStateLoss()
     }
 
-
-    private fun createCharactersView() {
-        val callBack: OnClickCharacter = this
-        runOnUiThread {
-            binding.characterList.apply {
-                this.adapter = CharacterAdapter(applicationContext, layoutInflater, characters, callBack)
-                this.layoutManager = GridLayoutManager(applicationContext, 3)
-                this.setHasFixedSize(true)
-            }
-        }
-    }
-
-    override fun onClickCharacter(characterEntity: CharacterEntity) {
-        //TODO
-    }
 }

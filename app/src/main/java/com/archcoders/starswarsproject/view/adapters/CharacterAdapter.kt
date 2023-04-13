@@ -12,6 +12,7 @@ import com.archcoders.starswarsproject.databinding.ItemPeopleBinding
 import com.archcoders.starswarsproject.entities.CharacterEntity
 import com.archcoders.starswarsproject.view.interfaces.OnClickCharacter
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.GlideException
 
 class CharacterAdapter(
     val context: Context,
@@ -37,7 +38,7 @@ class CharacterAdapter(
             try {
                 val url = character.thumbnail?.path + "." + character.thumbnail?.extension
                 Glide.with(context).load(url).into(binding.imageCharacter)
-            } catch (e: Exception) {
+            } catch (e: GlideException) {
                 val placeHolder = ContextCompat.getDrawable(context, R.drawable.ic_placeholder)
                 Glide.with(context).load(placeHolder).into(binding.imageCharacter)
                 Log.e("bind()", e.message ?: "Fail to get image from URL")
