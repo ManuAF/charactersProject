@@ -32,14 +32,6 @@
             />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/gV38"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintGuide_percent="0.38"
-            android:orientation="horizontal"
-            />
-
-        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/gV40"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -64,7 +56,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             tools:text="Lorem Ipsum Dolot"
-            android:textSize="15sp"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center_vertical|center_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/gV35"
@@ -77,10 +71,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             tools:text="Lorem Ipsum Dolot"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/gV38"
+            app:layout_constraintTop_toBottomOf="@+id/gV40"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

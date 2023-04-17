@@ -6,27 +6,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
-import com.archcoders.starswarsproject.ListCharacterViewModel
+import com.archcoders.starswarsproject.viewmodel.ListCharacterViewModel
 import com.archcoders.starswarsproject.databinding.FragmentListCharactersBinding
 import com.archcoders.starswarsproject.entities.CharacterEntity
+import com.archcoders.starswarsproject.usecase.impl.GetCharactersListUCImpl
+import com.archcoders.starswarsproject.utils.visible
 import com.archcoders.starswarsproject.view.adapters.CharacterAdapter
-import com.archcoders.starswarsproject.view.interfaces.OnClickCharacter
 import kotlinx.coroutines.launch
 
-class ListCharactersFragment: Fragment(), OnClickCharacter {
-
+class ListCharactersFragment : Fragment() {
     private lateinit var binding: FragmentListCharactersBinding
-    private var characters = mutableListOf<CharacterEntity>()
-    private var viewModel: ListCharacterViewModel = ListCharacterViewModel()
     private lateinit var applicationContext: Context
+
+    private var characters = mutableListOf<CharacterEntity>()
+
+    private lateinit var viewModel: ListCharacterViewModel
+    private lateinit var adapter: CharacterAdapter
+    private val getCharactersListUCImpl = GetCharactersListUCImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       context?.let {
-           applicationContext = it
-       }
+        context?.let {
+            applicationContext = it
+        }
     }
 
     override fun onCreateView(
@@ -35,6 +41,7 @@ class ListCharactersFragment: Fragment(), OnClickCharacter {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentListCharactersBinding.inflate(layoutInflater)
+
         return binding.root
     }
 
@@ -42,37 +49,37 @@ class ListCharactersFragment: Fragment(), OnClickCharacter {
         super.onViewCreated(view, savedInstanceState)
         bindViews()
     }
-    private fun bindViews(){
-        getCharacterList()
+
+    private fun bindViews() {
+        viewModel= ListCharacterViewModel(getCharactersListUCImpl)
+        adapter = CharacterAdapter(viewModel::onCharacterClick,layoutInflater)
+        binding.characterList.adapter = adapter
         setObservers()
     }
 
-    private fun getCharacterList() {
-        lifecycleScope.launch {
-            viewModel.createUserList()
-        }
-    }
-
     private fun setObservers() {
-        viewModel._characters.observe(viewLifecycleOwner){
-            characters = it
-            createCharactersView()
-        }
-    }
-
-
-    private fun createCharactersView() {
-        val callBack: OnClickCharacter = this
-        activity?.runOnUiThread {
-            binding.characterList.apply {
-                this.adapter = CharacterAdapter(applicationContext, layoutInflater, characters, callBack)
-                this.layoutManager = GridLayoutManager(applicationContext, 3)
-                this.setHasFixedSize(true)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.state.collect(::updateUI)
             }
         }
     }
 
-    override fun onClickCharacter(characterEntity: CharacterEntity) {
+    private fun updateUI(state: ListCharacterViewModel.UiState) {
+        binding.progress.visible = state.loading
+        state.characters?.let{
+            adapter.submitList(it)
+            binding.characterList.apply {
+                this.adapter = adapter
+                this.layoutManager = GridLayoutManager(applicationContext,3)
+                setHasFixedSize(true)
+            }
+        }
+        state.navigateTo?.let(::navigateTo)
+    }
+
+    private fun navigateTo(characterEntity: CharacterEntity) {
         (activity as MainActivity).goToCharacter(characterEntity)
     }
+
 }

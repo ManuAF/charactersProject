@@ -3,6 +3,7 @@ package com.archcoders.starswarsproject.view.adapters
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -10,20 +11,28 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.archcoders.starswarsproject.R
 import com.archcoders.starswarsproject.databinding.ItemPeopleBinding
 import com.archcoders.starswarsproject.entities.CharacterEntity
-import com.archcoders.starswarsproject.view.interfaces.OnClickCharacter
+import com.archcoders.starswarsproject.utils.basicDiffUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.GlideException
 
 class CharacterAdapter(
-    val context: Context,
-    private val layoutInflater: LayoutInflater,
-    private val characters: MutableList<CharacterEntity>,
-    private val callBack: OnClickCharacter
+    private val callBack: (CharacterEntity) -> Unit,
+    private val layoutInflater: LayoutInflater
 ) : RecyclerView.Adapter<CharacterAdapter.CharacterHolder>() {
 
+    private var characters: List<CharacterEntity> by basicDiffUtil(
+        emptyList(),
+        areItemsTheSame = { old, new -> old.id == new.id }
+    )
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterHolder {
-        val itemPeopleBinding = ItemPeopleBinding.inflate(layoutInflater, parent, false)
-        return CharacterHolder(itemPeopleBinding)
+        val binding = ItemPeopleBinding.inflate(layoutInflater)
+        return CharacterHolder(binding, parent.context)
+    }
+
+    fun submitList(characters: List<CharacterEntity>) {
+        this.characters = characters
+        notifyItemChanged(characters.size - 1)
     }
 
     override fun getItemCount(): Int = characters.size
@@ -31,10 +40,14 @@ class CharacterAdapter(
     override fun onBindViewHolder(holder: CharacterHolder, position: Int) {
         val character = characters[position]
         holder.bind(character)
+        holder.itemView.setOnClickListener { callBack(character) }
     }
 
-    inner class CharacterHolder(private val binding: ItemPeopleBinding) : ViewHolder(binding.root) {
-        fun bind(character: CharacterEntity) {
+    class CharacterHolder(
+        private val binding: ItemPeopleBinding,
+        private val context: Context
+    ) : ViewHolder(binding.root) {
+        fun bind(character: CharacterEntity) = with(binding) {
             try {
                 val url = character.thumbnail?.path + "." + character.thumbnail?.extension
                 Glide.with(context).load(url).into(binding.imageCharacter)
@@ -43,10 +56,8 @@ class CharacterAdapter(
                 Glide.with(context).load(placeHolder).into(binding.imageCharacter)
                 Log.e("bind()", e.message ?: "Fail to get image from URL")
             }
-            binding.nameCharacter.text = character.name
-            binding.root.setOnClickListener {
-                callBack.onClickCharacter(character)
-            }
+            nameCharacter.text = character.name
+
         }
     }
 }

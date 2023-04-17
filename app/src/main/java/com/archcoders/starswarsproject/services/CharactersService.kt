@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
 
-interface PeopleService {
+interface CharactersService {
     @Headers("Content-Type: application/json")
     @GET("characters")
     suspend fun getPeopleList(
