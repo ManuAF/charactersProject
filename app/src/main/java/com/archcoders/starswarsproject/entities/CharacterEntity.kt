@@ -4,7 +4,7 @@ data class CharacterEntity(
     val id: String?,
     val name: String?,
     val description: String?,
-    val gender: String?,
     val thumbnail: ThumbnailEntity?,
-    val resourceURI: String?
+    val resourceURI: String?,
+    val comics : ComicEntity?
 )
