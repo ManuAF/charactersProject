@@ -16,10 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.archcoders.starswarsproject.databinding.FragmentDetailBinding
 import com.archcoders.starswarsproject.entities.CharacterEntity
+import com.archcoders.starswarsproject.factory.DetailCharacterViewModelFactory
 import com.archcoders.starswarsproject.viewmodel.DetailCharacterViewModel
-import com.archcoders.starswarsproject.viewmodel.DetailCharacterViewModelFactory
 import com.bumptech.glide.Glide
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class DetailCharacterFragment(private val character: CharacterEntity) : Fragment() {

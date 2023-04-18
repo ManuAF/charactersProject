@@ -10,71 +10,47 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.archcoders.starswarsproject.R
 import com.archcoders.starswarsproject.viewmodel.ListCharacterViewModel
 import com.archcoders.starswarsproject.databinding.FragmentListCharactersBinding
 import com.archcoders.starswarsproject.entities.CharacterEntity
+import com.archcoders.starswarsproject.model.UiState
 import com.archcoders.starswarsproject.usecase.impl.GetCharactersListUCImpl
 import com.archcoders.starswarsproject.utils.visible
 import com.archcoders.starswarsproject.view.adapters.CharacterAdapter
 import kotlinx.coroutines.launch
 
-class ListCharactersFragment : Fragment() {
+class ListCharactersFragment : Fragment(R.layout.fragment_list_characters) {
     private lateinit var binding: FragmentListCharactersBinding
-    private lateinit var applicationContext: Context
-
-    private var characters = mutableListOf<CharacterEntity>()
-
     private lateinit var viewModel: ListCharacterViewModel
     private lateinit var adapter: CharacterAdapter
-    private val getCharactersListUCImpl = GetCharactersListUCImpl()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        context?.let {
-            applicationContext = it
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListCharactersBinding.inflate(layoutInflater)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindViews()
-    }
+        val binding = FragmentListCharactersBinding.bind(view).apply {
+            characterList.adapter = adapter
+        }
 
-    private fun bindViews() {
-        viewModel= ListCharacterViewModel(getCharactersListUCImpl)
-        adapter = CharacterAdapter(viewModel::onCharacterClick,layoutInflater)
-        binding.characterList.adapter = adapter
-        setObservers()
-    }
-
-    private fun setObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewModel.state.collect(::updateUI)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect {
+                    binding.updateUI(it)
+                }
             }
         }
     }
 
-    private fun updateUI(state: ListCharacterViewModel.UiState) {
-        binding.progress.visible = state.loading
-        state.characters?.let{
-            adapter.submitList(it)
-            binding.characterList.apply {
-                this.adapter = adapter
-                this.layoutManager = GridLayoutManager(applicationContext,3)
-                setHasFixedSize(true)
-            }
-        }
+    private fun FragmentListCharactersBinding.updateUI(state: UiState) {
+        progress.visible = state.loading
+        state.characters?.let(adapter::submitList)
         state.navigateTo?.let(::navigateTo)
     }
 

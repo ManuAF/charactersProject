@@ -13,13 +13,4 @@ class DetailCharacterViewModel(character: CharacterEntity) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(character))
     val state: StateFlow<UiState> = _state.asStateFlow()
-
-}
-
-@Suppress("UNCHECKED_CAST")
-class DetailCharacterViewModelFactory(private val character: CharacterEntity) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return DetailCharacterViewModel(character) as T
-    }
 }
